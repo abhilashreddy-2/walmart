@@ -1,0 +1,100 @@
+import java.util.ArrayList;
+import java.util.List;
+
+public class PowerOfTwoMaxHeap {
+    private List<Integer> heap;
+    private int arity;
+
+    public PowerOfTwoMaxHeap(int arity) {
+        if (arity <= 0 || (arity & (arity - 1)) != 0) {
+            throw new IllegalArgumentException("Arity must be a positive power of two");
+        }
+        this.heap = new ArrayList<>();
+        this.arity = arity;
+    }
+
+    public void insert(int value) {
+        heap.add(value);
+        heapifyUp();
+    }
+
+    public int popMax() {
+        if (isEmpty()) {
+            throw new IllegalStateException("Heap is empty");
+        }
+
+        int max = heap.get(0);
+        int lastElement = heap.remove(heap.size() - 1);
+
+        if (!isEmpty()) {
+            heap.set(0, lastElement);
+            heapifyDown();
+        }
+
+        return max;
+    }
+
+    private void heapifyUp() {
+        int index = heap.size() - 1;
+        int parentIndex = (index - 1) / arity;
+
+        while (index > 0 && heap.get(index) > heap.get(parentIndex)) {
+            swap(index, parentIndex);
+            index = parentIndex;
+            parentIndex = (index - 1) / arity;
+        }
+    }
+
+    private void heapifyDown() {
+        int index = 0;
+
+        while (true) {
+            int maxChild = getMaxChildIndex(index);
+            if (maxChild == -1 || heap.get(index) >= heap.get(maxChild)) {
+                break;
+            }
+            swap(index, maxChild);
+            index = maxChild;
+        }
+    }
+
+    private int getMaxChildIndex(int index) {
+        int startChildIndex = index * arity + 1;
+        if (startChildIndex >= heap.size()) {
+            return -1;
+        }
+
+        int maxChildIndex = startChildIndex;
+        int endChildIndex = Math.min(startChildIndex + arity, heap.size());
+
+        for (int i = startChildIndex + 1; i < endChildIndex; i++) {
+            if (heap.get(i) > heap.get(maxChildIndex)) {
+                maxChildIndex = i;
+            }
+        }
+
+        return maxChildIndex;
+    }
+
+    private void swap(int i, int j) {
+        int temp = heap.get(i);
+        heap.set(i, heap.get(j));
+        heap.set(j, temp);
+    }
+
+    public boolean isEmpty() {
+        return heap.isEmpty();
+    }
+
+    public static void main(String[] args) {
+        // Example usage
+        PowerOfTwoMaxHeap heap = new PowerOfTwoMaxHeap(2);
+        heap.insert(10);
+        heap.insert(5);
+        heap.insert(20);
+        heap.insert(8);
+
+        System.out.println("Max element: " + heap.popMax()); // Output: 20
+        System.out.println("Max element: " + heap.popMax()); // Output: 10
+    }
+}
